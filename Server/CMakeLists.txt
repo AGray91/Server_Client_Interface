@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project ("AGServer" LANGUAGES CXX)
 
 # Get Source Files...
+set(MAIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Src")
 set(SERVER_SRC 	"${CMAKE_CURRENT_SOURCE_DIR}/Src/Server")
 set(UI_SRC 	"${CMAKE_CURRENT_SOURCE_DIR}/Src/UI")
 
@@ -23,9 +24,15 @@ source_group("Source Files\\UI" 	FILES ${UI_SOURCE})
 
 # Define the Executable...
 add_executable(AGServer
+	${MAIN_SRC}/Main.cpp
 	${SERVER_HEADERS}
 	${SERVER_SOURCE}
 	${UI_HEADERS}
 	${UI_SOURCE}
 )
 
+# Set Executable type to Win32
+set_target_properties(AGServer PROPERTIES WIN32_EXECUTABLE TRUE)
+
+# Link Libraries
+target_link_libraries(AGServer PRIVATE AGCommon)

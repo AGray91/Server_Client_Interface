@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project ("AGClient" LANGUAGES CXX)
 
 # Get Source Files...
+set(MAIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Src")
 set(CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Src/Client")
 set(UI_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Src/UI")
 
@@ -22,10 +23,16 @@ source_group("Source Files\\Client" FILES ${CLIENT_SOURCE})
 source_group("Source Files\\UI" FILES ${UI_SOURCE})
 
 # Define the Executable...
-add_executable (AGClient
+add_executable(AGClient
+	${MAIN_SRC}/Main.cpp
 	${CLIENT_HEADERS}
 	${CLIENT_SOURCE}
 	${UI_HEADERS}
 	${UI_SOURCE}
 )
 
+# Set Executable type to Win32
+set_target_properties(AGClient PROPERTIES WIN32_EXECUTABLE TRUE)
+
+# Link Libraries
+target_link_libraries(AGClient PRIVATE AGCommon)
