@@ -47,7 +47,7 @@ namespace AGWin32
 	namespace ListView
 	{
 		void register_common_ctrls();
-		bool create_listview(LISTVIEW& listview, HWND parent, HINSTANCE hInst, int id, std::vector<HEADER> columns);
+		bool create(LISTVIEW& listview, HWND parent, HINSTANCE hInst, int id, std::vector<HEADER> columns);
 		void add_row(LISTVIEW& listview, std::vector<std::wstring> row);
 		void add_row_item(LISTVIEW& listview, const wchar_t* row);
 		void add_row_sub_item(LISTVIEW& listview, const wchar_t* row, const wchar_t* col, const wchar_t* value);

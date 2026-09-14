@@ -1,4 +1,5 @@
 #include "ListView.h"
+#include <CommCtrl.h>
 
 #ifndef UNICODE
 #define UNICODE
@@ -27,7 +28,7 @@ void AGWin32::ListView::register_common_ctrls()
 	InitCommonControlsEx(&icex);
 }
 
-bool AGWin32::ListView::create_listview(LISTVIEW& listview, HWND parent, HINSTANCE hInst, int id, std::vector<HEADER> columns)
+bool AGWin32::ListView::create(LISTVIEW& listview, HWND parent, HINSTANCE hInst, int id, std::vector<HEADER> columns)
 {
 	bool retVal = true;
 
