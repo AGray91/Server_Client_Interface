@@ -9,14 +9,17 @@
 #define AGS_MSGTYPE_WRITETOCLIENT		4
 
 // Data Types...
-#define AGS_DATATYPE_SINT8	1	// INT1
-#define AGS_DATATYPE_UINT8	2	// LOG1
-#define AGS_DATATYPE_SINT16	3	// INT2
-#define AGS_DATATYPE_UINT16	4	// LOG2
-#define AGS_DATATYPE_SINT32	5	// INT4
-#define AGS_DATATYPE_UINT32	6	// LOG4
-#define AGS_DATATYPE_REAL4	7	// REAL4
-#define AGS_DATATYPE_REAL8	8	// REAL8
+#define AGS_DATATYPE_STR8		0	// CHAR[8]
+#define AGS_DATATYPE_SINT8		1	// INT1
+#define AGS_DATATYPE_UINT8		2	// LOG1
+#define AGS_DATATYPE_SINT16		3	// INT2
+#define AGS_DATATYPE_UINT16		4	// LOG2
+#define AGS_DATATYPE_SINT32		5	// INT4
+#define AGS_DATATYPE_UINT32		6	// LOG4
+#define AGS_DATATYPE_REAL4		7	// REAL4
+#define AGS_DATATYPE_REAL8		8	// REAL8
+
+#define AGS_DATATYPE_INVALID	10	// INVALID
 
 // Union to hold data so we can send multiple data types under one type...
 union AGS_LABEL_VALUE
