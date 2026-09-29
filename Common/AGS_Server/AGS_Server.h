@@ -42,6 +42,12 @@ struct AGS_DATA_RECORD
 	AGS_LABEL_VALUE data;
 };
 
+struct AGS_DATA_ARR_RECORD
+{
+	char label_name[MAX_LABELNAME_SIZE];
+	char data[MAX_LABELNAME_SIZE];
+};
+
 // Packet used to send/receive by both client and server...
 struct AGS_DATA_PACKET
 {
