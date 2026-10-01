@@ -11,7 +11,7 @@ namespace AGS_Server
 		unsigned int quantity;
 		std::string description;
 	};
-	
+
 	struct Config_Rec
 	{
 		bool server_connect;

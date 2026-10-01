@@ -1,14 +1,32 @@
 #include "AGS_CDB.h"
 #include <mutex>
 
+/*
+NOTE:
+This class would be better suited as a simple read/write class with no descrimination over Input or Output...
+Could also benefit from condensing read/write functions into template functions so we can just have one definition for each...
+*/
+
 namespace AGS_Server
 {
 	std::mutex mtx;
 }
 
-AGS_Server::CDB::CDB()
+AGS_Server::CDB::CDB(Config_Rec& config)
 {
+	std::vector<Label_Data>::iterator itr;
 
+	for (itr = config.input_labels.begin(); itr != config.input_labels.end(); itr++)
+		add_input_single_label(itr->label_name, itr->label_type);
+
+	for (itr = config.input_array_labels.begin(); itr != config.input_array_labels.end(); itr++)
+		add_input_arr_label(itr->label_name);
+
+	for (itr = config.output_labels.begin(); itr != config.output_labels.end(); itr++)
+		add_output_single_label(itr->label_name, itr->label_type);
+
+	for (itr = config.output_array_labels.begin(); itr != config.output_array_labels.end(); itr++)
+		add_output_arr_label(itr->label_name);
 }
 
 void AGS_Server::CDB::add_listener_update(std::function<void> event_listener)
@@ -122,7 +140,7 @@ const std::vector<std::string> AGS_Server::CDB::get_output_arr_labels()
 	return retval;
 }
 
-// write_input INT1...
+// write INT1...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const char value)
 {
 	std::lock_guard<std::mutex> lock(mtx);
@@ -133,7 +151,7 @@ bool AGS_Server::CDB::write_input(const std::string& label_name, const char valu
 	itr = input_labels.find(label_name);
 	if (itr != input_labels.end())
 	{
-		if (itr->second.data_type = AGS_DATATYPE_SINT8)
+		if (itr->second.data_type == AGS_DATATYPE_SINT8)
 		{
 			itr->second.data.s8 = value;
 			retval = true;
@@ -143,7 +161,7 @@ bool AGS_Server::CDB::write_input(const std::string& label_name, const char valu
 	return retval;
 }
 
-// Write_input LOG1
+// Write LOG1...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const unsigned char value)
 {
 	std::lock_guard<std::mutex> lock(mtx);
@@ -154,7 +172,7 @@ bool AGS_Server::CDB::write_input(const std::string& label_name, const unsigned 
 	itr = input_labels.find(label_name);
 	if (itr != input_labels.end())
 	{
-		if (itr->second.data_type = AGS_DATATYPE_UINT8)
+		if (itr->second.data_type == AGS_DATATYPE_UINT8)
 		{
 			itr->second.data.u8 = value;
 			retval = true;
@@ -164,82 +182,600 @@ bool AGS_Server::CDB::write_input(const std::string& label_name, const unsigned 
 	return retval;
 }
 
+// Write INT2...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const short value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT16)
+		{
+			itr->second.data.s16 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
+// Write LOG2...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const unsigned short value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT16)
+		{
+			itr->second.data.u16 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
+// Write INT4...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const int value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT32)
+		{
+			itr->second.data.s32 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
+// Write LOG4...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const unsigned int value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT32)
+		{
+			itr->second.data.u32 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
+// Write REAL...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const float value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL4)
+		{
+			itr->second.data.f32 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
+// Write DBLE...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const double value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL8)
+		{
+			itr->second.data.f64 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
-bool AGS_Server::CDB::write_input(const std::string& label_name, const char* value)
+// Read Input INT1...
+bool AGS_Server::CDB::read_input(const std::string& label_name, char& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT8)
+		{
+			value = itr->second.data.s8;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, char& value)
+// Read Input LOG1...
+bool AGS_Server::CDB::read_input(const std::string& label_name, unsigned char& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT8)
+		{
+			value = itr->second.data.u8;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, unsigned char& value)
+// Read Input INT2...
+bool AGS_Server::CDB::read_input(const std::string& label_name, short& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT16)
+		{
+			value = itr->second.data.s16;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, short& value)
+// Read Input LOG2...
+bool AGS_Server::CDB::read_input(const std::string& label_name, unsigned short& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT16)
+		{
+			value = itr->second.data.u16;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, unsigned short& value)
+// Read Input INT4...
+bool AGS_Server::CDB::read_input(const std::string& label_name, int& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT32)
+		{
+			value = itr->second.data.s32;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, int& value)
+// Read Input LOG4...
+bool AGS_Server::CDB::read_input(const std::string& label_name, unsigned int& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT32)
+		{
+			value = itr->second.data.u32;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, unsigned int& value)
+// Read Input REAL...
+bool AGS_Server::CDB::read_input(const std::string& label_name, float& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL4)
+		{
+			value = itr->second.data.f32;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, float& value)
+// Real Input DBLE...
+bool AGS_Server::CDB::read_input(const std::string& label_name, double& value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL8)
+		{
+			value = itr->second.data.f64;
+			retval = true;
+		}
+	}
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, double& value)
+// Write Output INT1...
+bool AGS_Server::CDB::write_output(const std::string& label_name, const char value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT8)
+		{
+			itr->second.data.s8 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
 }
 
-bool AGS_Server::CDB::read(const std::string& label_name, char* value)
+// Write Output LOG1
+bool AGS_Server::CDB::write_output(const std::string& label_name, const unsigned char value)
 {
-	return false;
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT8)
+		{
+			itr->second.data.u8 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Write Output INT2
+bool AGS_Server::CDB::write_output(const std::string& label_name, const short value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT16)
+		{
+			itr->second.data.s16 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Write Output LOG2
+bool AGS_Server::CDB::write_output(const std::string& label_name, const unsigned short value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT16)
+		{
+			itr->second.data.u16 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Write Output INT4
+bool AGS_Server::CDB::write_output(const std::string& label_name, const int value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT32)
+		{
+			itr->second.data.s32 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Write Output LOG4
+bool AGS_Server::CDB::write_output(const std::string& label_name, const unsigned int value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT32)
+		{
+			itr->second.data.u32 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Write Output REAL
+bool AGS_Server::CDB::write_output(const std::string& label_name, const float value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL4)
+		{
+			itr->second.data.f32 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Write Output DBLE
+bool AGS_Server::CDB::write_output(const std::string& label_name, const double value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL8)
+		{
+			itr->second.data.f64 = value;
+			retval = true;
+		}
+	}
+
+	return retval;
+}
+
+// Read Output INT1
+bool AGS_Server::CDB::read_output(const std::string& label_name, char& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT8)
+		{
+			value = itr->second.data.s8;
+			retval = true;
+		}
+	}
+}
+
+// Read Output LOG1
+bool AGS_Server::CDB::read_output(const std::string& label_name, unsigned char& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT8)
+		{
+			value = itr->second.data.u8;
+			retval = true;
+		}
+	}
+}
+
+// Read Output INT2
+bool AGS_Server::CDB::read_output(const std::string& label_name, short& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT16)
+		{
+			value = itr->second.data.s16;
+			retval = true;
+		}
+	}
+}
+
+// Read Output LOG2
+bool AGS_Server::CDB::read_output(const std::string& label_name, unsigned short& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT16)
+		{
+			value = itr->second.data.u16;
+			retval = true;
+		}
+	}
+}
+
+// Read Output INT4
+bool AGS_Server::CDB::read_output(const std::string& label_name, int& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_SINT32)
+		{
+			value = itr->second.data.s32;
+			retval = true;
+		}
+	}
+}
+
+// Read Output LOG4
+bool AGS_Server::CDB::read_output(const std::string& label_name, unsigned int& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_UINT32)
+		{
+			value = itr->second.data.u32;
+			retval = true;
+		}
+	}
+}
+
+// Read Output REAL4
+bool AGS_Server::CDB::read_output(const std::string& label_name, float& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL4)
+		{
+			value = itr->second.data.f32;
+			retval = true;
+		}
+	}
+}
+
+// Read Output REAL8
+bool AGS_Server::CDB::read_output(const std::string& label_name, double& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == AGS_DATATYPE_REAL8)
+		{
+			value = itr->second.data.f64;
+			retval = true;
+		}
+	}
 }

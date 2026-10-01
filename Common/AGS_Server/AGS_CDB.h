@@ -4,35 +4,54 @@
 #include <unordered_map>
 #include <vector>
 #include <functional>
+#include "AGS_Config.h"
 
 namespace AGS_Server
 {
 	class CDB
 	{
 	public:
-		CDB();
+		CDB(Config_Rec& config);
 
-		// Write to CDB...
-		bool write_input(const std::string& label_name, const char value);			// sint8	INT1
-		bool write_input(const std::string& label_name, const unsigned char value);	// uint8	LOG1
-		bool write_input(const std::string& label_name, const short value);			// sint16	INT2
+		// Write Input to CDB...
+		bool write_input(const std::string& label_name, const char value);				// sint8	INT1
+		bool write_input(const std::string& label_name, const unsigned char value);		// uint8	LOG1
+		bool write_input(const std::string& label_name, const short value);				// sint16	INT2
 		bool write_input(const std::string& label_name, const unsigned short value);	// uint16	LOG2
 		bool write_input(const std::string& label_name, const int value);				// sint32	INT4
-		bool write_input(const std::string& label_name, const unsigned int value);	// uint32	LOG4
-		bool write_input(const std::string& label_name, const float value);			// float32	REAL4
+		bool write_input(const std::string& label_name, const unsigned int value);		// uint32	LOG4
+		bool write_input(const std::string& label_name, const float value);				// float32	REAL4
 		bool write_input(const std::string& label_name, const double value);			// float64	DBLE
-		bool write_input(const std::string& label_name, const char* value);			// string	STR
 
-		// Read from CDB...
-		bool read(const std::string& label_name, char& value);				// sint8	INT1
-		bool read(const std::string& label_name, unsigned char& value);		// uint8	LOG1
-		bool read(const std::string& label_name, short& value);				// sint16	INT2
-		bool read(const std::string& label_name, unsigned short& value);	// uint16	LOG2
-		bool read(const std::string& label_name, int& value);				// sint32	INT4
-		bool read(const std::string& label_name, unsigned int& value);		// uint32	LOG4
-		bool read(const std::string& label_name, float& value);				// float32	REAL4
-		bool read(const std::string& label_name, double& value);			// float64	DBLE
-		bool read(const std::string& label_name, char* value);				// string	STR
+		// Read Input from CDB...
+		bool read_input(const std::string& label_name, char& value);				// sint8	INT1
+		bool read_input(const std::string& label_name, unsigned char& value);		// uint8	LOG1
+		bool read_input(const std::string& label_name, short& value);				// sint16	INT2
+		bool read_input(const std::string& label_name, unsigned short& value);		// uint16	LOG2
+		bool read_input(const std::string& label_name, int& value);					// sint32	INT4
+		bool read_input(const std::string& label_name, unsigned int& value);		// uint32	LOG4
+		bool read_input(const std::string& label_name, float& value);				// float32	REAL4
+		bool read_input(const std::string& label_name, double& value);				// float64	DBLE
+
+		// Write Output to CDB...
+		bool write_output(const std::string& label_name, const char value);				// sint8	INT1
+		bool write_output(const std::string& label_name, const unsigned char value);	// uint8	LOG1
+		bool write_output(const std::string& label_name, const short value);			// sint16	INT2
+		bool write_output(const std::string& label_name, const unsigned short value);	// uint16	LOG2
+		bool write_output(const std::string& label_name, const int value);				// sint32	INT4
+		bool write_output(const std::string& label_name, const unsigned int value);		// uint32	LOG4
+		bool write_output(const std::string& label_name, const float value);			// float32	REAL4
+		bool write_output(const std::string& label_name, const double value);			// float64	DBLE
+
+		// Read Output from CDB...
+		bool read_output(const std::string& label_name, char& value);				// sint8	INT1
+		bool read_output(const std::string& label_name, unsigned char& value);		// uint8	LOG1
+		bool read_output(const std::string& label_name, short& value);				// sint16	INT2
+		bool read_output(const std::string& label_name, unsigned short& value);		// uint16	LOG2
+		bool read_output(const std::string& label_name, int& value);				// sint32	INT4
+		bool read_output(const std::string& label_name, unsigned int& value);		// uint32	LOG4
+		bool read_output(const std::string& label_name, float& value);				// float32	REAL4
+		bool read_output(const std::string& label_name, double& value);				// float64	DBLE
 
 		// Add a listener to CDB Updated Event...
 		void add_listener_update(std::function<void> event_listener);

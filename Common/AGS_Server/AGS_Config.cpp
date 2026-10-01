@@ -1,8 +1,9 @@
-#include "Config.h"
+#include "AGS_Config.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include "AGS_Server/AGS_Server.h"
+#include "AGS_Server.h"
+#include "AGS_Log.h"
 
 namespace AGS_Server
 {
@@ -56,6 +57,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 		else
 		{
 			// Log error...
+			std::string msg = "ERROR: No server connect marker found in config file!";
+			log(msg);
 		}
 
 		// Get the server port number from config file...
@@ -66,6 +69,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 		else
 		{
 			// Log error...
+			std::string msg = "ERROR: No port marker found in config file!";
+			log(msg);
 		}
 
 		// Gather the single input labels from the config file... NOTE: Input = input to server...
@@ -76,6 +81,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 		else
 		{
 			// Log error...
+			std::string msg = "ERROR: No input label marker found in config file!";
+			log(msg);
 		}
 
 		// Gather the input array labels from the config file... NOTE: Input = input to server...
@@ -86,6 +93,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 		else
 		{
 			// Log error...
+			std::string msg = "ERROR: No input label marker found in config file!";
+			log(msg);
 		}
 
 		// Gather the single output labels from the config file... NOTE: Output = output from server...
@@ -96,6 +105,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 		else
 		{
 			// Log error...
+			std::string msg = "ERROR: No output label marker found in config file!";
+			log(msg);
 		}
 
 
@@ -107,6 +118,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 		else
 		{
 			// Log error...
+			std::string msg = "ERROR: No output label marker found in config file!";
+			log(msg);
 		}
 	}
 
@@ -139,10 +152,14 @@ bool AGS_Server::read_server_connect(std::ifstream& config_file)
 	if (retval)
 	{
 		// Log connection flag...
+		std::string msg = "Server Connect Flag: YES";
+		log(msg);
 	}
 	else
 	{
 		// Log connection flag...
+		std::string msg = "Server Connect Flag: NO";
+		log(msg);
 	}
 
 	return retval;
@@ -171,10 +188,14 @@ unsigned int AGS_Server::read_server_port(std::ifstream& config_file)
 	if (found)
 	{
 		// Log Server Port...
+		std::string msg = "Server Port Set: " + line;
+		log(msg);
 	}
 	else
 	{
-		// Log error...
+		// Log error..
+		std::string msg = "ERROR: No server port found!";
+		log(msg);
 	}
 
 	return retval;
@@ -345,6 +366,8 @@ unsigned int AGS_Server::get_single_datatype(const std::string& data_type)
 	catch (...)
 	{
 		// Log error...
+		std::string msg = "ERROR: Unsupported type " + data_type + " from config file...";
+		log(msg);
 	}
 
 	return type;
