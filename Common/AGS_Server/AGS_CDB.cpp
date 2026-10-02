@@ -4,7 +4,6 @@
 /*
 NOTE:
 This class would be better suited as a simple read/write class with no descrimination over Input or Output...
-Could also benefit from condensing read/write functions into template functions so we can just have one definition for each...
 */
 
 namespace AGS_Server
@@ -29,9 +28,9 @@ AGS_Server::CDB::CDB(Config_Rec& config)
 		add_output_arr_label(itr->label_name);
 }
 
-void AGS_Server::CDB::add_listener_update(std::function<void> event_listener)
+void AGS_Server::CDB::add_listener_update(std::function<void()> event_listener)
 {
-	update_delegates.push_back(std::move(event_listener));
+	update_delegates.push_back(event_listener);
 }
 
 // Create a new entry in the Input Single Label CDB...
@@ -140,6 +139,150 @@ const std::vector<std::string> AGS_Server::CDB::get_output_arr_labels()
 	return retval;
 }
 
+
+bool AGS_Server::CDB::write_input(const AGS_DATA_RECORD& record)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	std::string lbl_name = record.label_name;
+	itr = input_labels.find(lbl_name);
+	if (itr != input_labels.end())
+	{
+		if (itr->second.data_type == record.data_type)
+		{
+			itr->second = record;
+			retval = true;
+		}		
+	}
+	return retval;
+}
+
+bool AGS_Server::CDB::write_arr_input(const AGS_DATA_ARR_RECORD& record)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_ARR_RECORD>::iterator itr;
+	std::string lbl_name = record.label_name;
+	itr = input_arr_labels.find(lbl_name);
+	if (itr != input_arr_labels.end())
+	{
+		itr->second = record;
+		retval = true;
+	}
+
+	return retval;
+}
+
+bool AGS_Server::CDB::read_input(const std::string& label_name, AGS_DATA_RECORD& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = input_labels.find(label_name);
+	if (itr != input_labels.end())
+	{
+		value = itr->second;
+		retval = true;
+	}
+
+	return retval;
+}
+
+bool AGS_Server::CDB::read_arr_input(const std::string& label_name, AGS_DATA_ARR_RECORD& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_ARR_RECORD>::iterator itr;
+
+	itr = input_arr_labels.find(label_name);
+	if (itr != input_arr_labels.end())
+	{
+		value = itr->second;
+		retval = true;
+	}
+
+	return retval;
+}
+
+bool AGS_Server::CDB::write_output(const AGS_DATA_RECORD& record)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	std::string lbl_name = record.label_name;
+	itr = output_labels.find(lbl_name);
+	if (itr != output_labels.end())
+	{
+		if (itr->second.data_type == record.data_type)
+		{
+			itr->second = record;
+			retval = true;
+		}
+	}
+	return retval;
+}
+
+bool AGS_Server::CDB::write_arr_output(const AGS_DATA_ARR_RECORD& record)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_ARR_RECORD>::iterator itr;
+
+	std::string lbl_name = record.label_name;
+	itr = output_arr_labels.find(lbl_name);
+	if (itr != output_arr_labels.end())
+	{
+		itr->second = record;
+		retval = true;
+	}
+	return retval;
+}
+
+bool AGS_Server::CDB::read_output(const std::string& label_name, AGS_DATA_RECORD& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_RECORD>::iterator itr;
+
+	itr = output_labels.find(label_name);
+	if (itr != output_labels.end())
+	{
+		value = itr->second;
+		retval = true;
+	}
+
+	return retval;
+}
+
+bool AGS_Server::CDB::read_arr_output(const std::string& label_name, AGS_DATA_ARR_RECORD& value)
+{
+	std::lock_guard<std::mutex> lock(mtx);
+	bool retval = false;
+
+	std::unordered_map<std::string, AGS_DATA_ARR_RECORD>::iterator itr;
+
+	itr = output_arr_labels.find(label_name);
+	if (itr != output_arr_labels.end())
+	{
+		value = itr->second;
+		retval = true;
+	}
+
+	return retval;
+}
+
+/*
 // write INT1...
 bool AGS_Server::CDB::write_input(const std::string& label_name, const char value)
 {
@@ -325,6 +468,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, char& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Input LOG1...
@@ -344,6 +489,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, unsigned char& v
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Input INT2...
@@ -363,6 +510,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, short& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Input LOG2...
@@ -382,6 +531,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, unsigned short& 
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Input INT4...
@@ -401,6 +552,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, int& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Input LOG4...
@@ -420,6 +573,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, unsigned int& va
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Input REAL...
@@ -439,6 +594,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, float& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Real Input DBLE...
@@ -458,6 +615,8 @@ bool AGS_Server::CDB::read_input(const std::string& label_name, double& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Write Output INT1...
@@ -645,6 +804,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, char& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output LOG1
@@ -664,6 +825,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, unsigned char& 
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output INT2
@@ -683,6 +846,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, short& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output LOG2
@@ -702,6 +867,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, unsigned short&
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output INT4
@@ -721,6 +888,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, int& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output LOG4
@@ -740,6 +909,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, unsigned int& v
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output REAL4
@@ -759,6 +930,8 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, float& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
 
 // Read Output REAL8
@@ -778,4 +951,7 @@ bool AGS_Server::CDB::read_output(const std::string& label_name, double& value)
 			retval = true;
 		}
 	}
+
+	return retval;
 }
+*/

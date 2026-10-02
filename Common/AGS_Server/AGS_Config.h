@@ -14,8 +14,8 @@ namespace AGS_Server
 
 	struct Config_Rec
 	{
-		bool server_connect;
-		unsigned int server_port;
+		bool server_connect = false;
+		unsigned int server_port = 0;
 		std::vector<Label_Data> input_labels;
 		std::vector<Label_Data> input_array_labels;
 		std::vector<Label_Data> output_labels;

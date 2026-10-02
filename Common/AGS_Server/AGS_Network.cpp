@@ -1,4 +1,4 @@
-#include "Network.h"
+#include "AGS_Network.h"
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <mutex>
@@ -8,9 +8,11 @@
 #include <Windows.h>
 #endif
 
+#pragma comment(lib,"Ws2_32.lib")
+
 namespace AGS_Server
 {
-	long dead_band = 0.0f;
+	long dead_band = 0.0;
 	unsigned int port_number = 0;
 	bool is_network_open = false;
 	std::atomic<bool> is_client_connected = false;
@@ -146,7 +148,7 @@ bool AGS_Server::receive_msg(char* buffer, int length)
 {
 	bool retval = false;
 
-	unsigned int total_received = 0;
+	int total_received = 0;
 	
 	while (total_received < length)
 	{
@@ -156,7 +158,7 @@ bool AGS_Server::receive_msg(char* buffer, int length)
 		{
 			int err = WSAGetLastError();
 
-			if (err = WSAETIMEDOUT)
+			if (err == WSAETIMEDOUT)
 			{
 				// Log timeout...
 				continue;
