@@ -14,6 +14,6 @@ namespace AGS_Server
 	std::string get_ip_address();
 
 	// TCP send/receive functions...
-	bool receive_msg(char* buffer, int length);
-	bool send_msg(const char* buffer, int length);
+	bool receive_msg(uint8_t* buffer, int length);
+	bool send_msg(const uint8_t* buffer, int length);
 }

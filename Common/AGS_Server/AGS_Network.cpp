@@ -144,7 +144,7 @@ std::string AGS_Server::get_ip_address()
 	return std::string();
 }
 
-bool AGS_Server::receive_msg(char* buffer, int length)
+bool AGS_Server::receive_msg(uint8_t* buffer, int length)
 {
 	bool retval = false;
 
@@ -152,7 +152,7 @@ bool AGS_Server::receive_msg(char* buffer, int length)
 	
 	while (total_received < length)
 	{
-		int bytes_received = recv(client_socket, buffer + total_received, length - total_received, 0);
+		int bytes_received = recv(client_socket, reinterpret_cast<char*>(buffer) + total_received, length - total_received, 0);
 
 		if (bytes_received == SOCKET_ERROR)
 		{
@@ -190,7 +190,7 @@ bool AGS_Server::receive_msg(char* buffer, int length)
 	return retval;
 }
 
-bool AGS_Server::send_msg(const char* buffer, int length)
+bool AGS_Server::send_msg(const uint8_t* buffer, int length)
 {
 	// Log sending data...
 
@@ -200,7 +200,7 @@ bool AGS_Server::send_msg(const char* buffer, int length)
 
 	while (total_sent < length)
 	{
-		int bytes_sent = send(client_socket, buffer + total_sent, length - total_sent, 0);
+		int bytes_sent = send(client_socket, reinterpret_cast<const char*>(buffer) + total_sent, length - total_sent, 0);
 
 		if (bytes_sent == SOCKET_ERROR)
 		{
