@@ -1,21 +1,13 @@
 #include "Server.h"
 #include <thread>
+#include "AGS_Server/AGS_Server.h"
 #include "AGS_Server/AGS_Network.h"
 #include "AGS_Server/AGS_Log.h"
 #include <winsock.h>
-#include "AGS_Server/AGS_Server.h"
 #include "AGS_Server/AGS_CDB.h"
-#include "AGS_Server/AGS_Config.h"
 
 namespace AGS_Server
 {
-	struct AGS_Header
-	{
-		int32_t payload_size;
-		int32_t msg_type;
-		int32_t client_id;
-	};
-
 	bool server_running = false;
 	bool client_has_connected = false;
 
@@ -24,12 +16,15 @@ namespace AGS_Server
 	CDB* cdb;
 	Config_Rec* config;
 
+	AGS_DATA_PACKET in_payload;
+	AGS_DATA_PACKET out_payload;
+
 	void send_loop();
 	void send_client_connected();
 	void receive_from_client();
 	void send_to_client();
 
-	bool deserialise_header(const char* input, AGS_Header& output);
+	// bool deserialise_header(const char* input, AGS_Header& output);
 }
 
 void AGS_Server::start_server()
@@ -80,6 +75,9 @@ void AGS_Server::start_server()
 	if (send_loop_thread.joinable())
 		send_loop_thread.join();
 
+	delete config;
+	delete cdb;
+
 	shutdown_log();
 	close_network();
 }
@@ -110,6 +108,59 @@ void AGS_Server::receive_from_client()
 	std::string msg = "Reading from client...";
 	log(msg);
 
+	uint8_t header[9];
+	if (receive_msg(header, sizeof(header)))
+	{
+		memcpy_s(&in_payload.header, sizeof(in_payload.header), header, sizeof(in_payload.header));
+		memcpy_s(&in_payload.message_type, sizeof(in_payload.message_type), header + 4, sizeof(in_payload.message_type));
+		memcpy_s(&in_payload.num_records, sizeof(in_payload.num_records), header + 5, sizeof(in_payload.num_records));
+
+		if (in_payload.header != 0x5A5A5A5A)
+		{
+			msg = "Failed to receive correct header...";
+			log(msg);
+
+			stop_server();
+			return;
+		}
+
+		uint8_t* payload = new uint8_t[sizeof(AGS_DATA_RECORD) * in_payload.num_records];
+
+		msg = "Reading payload...";
+		log(msg);
+
+		if (receive_msg(payload, sizeof(payload)))
+		{
+			switch (in_payload.message_type)
+			{
+			case AGS_MSGTYPE_REGISTER:
+				break;
+
+			case AGS_MSGTYPE_WRITETOSERVER:
+				break;
+
+			case AGS_MSGTYPE_WRITEARRAYTOSERVER:
+				break;
+			}
+		}
+		else
+		{
+			msg = "Failed to recieve message when looking for payload...";
+			log(msg);
+		}
+
+		delete[] payload;
+	}
+	else
+	{
+		msg = "Failed to receive message when looking for header...";
+		log(msg);
+	}
+
+	msg = "Finished reading from client...";
+	log(msg);
+
+	/*
 	char header[16];
 	char* payload;
 
@@ -166,6 +217,7 @@ void AGS_Server::receive_from_client()
 
 	msg = "Finished reading from client...";
 	log(msg);
+	*/
 }
 
 void AGS_Server::send_to_client()
@@ -173,30 +225,49 @@ void AGS_Server::send_to_client()
 	if (cdb == nullptr)
 		return;
 
-	// Create header...
-	AGS_Header header;
+	// Header code and message type...
+	out_payload.header = 0x5A5A5A5A;
+	out_payload.message_type = AGS_MSGTYPE_WRITETOCLIENT;
 
-	// Get all single labels...
-	std::vector<std::string> output_label_names = cdb->get_output_single_labels();
+	// Update out_payload...
+	out_payload.num_records = config->output_labels.size();
+	out_payload.records.clear();
+	out_payload.records.reserve(out_payload.num_records);
 
-	// Create payload...
-	std::vector<char> payload;
-
-	// Get number of labels...
-	append_to_buff(payload, output_label_names.size());
+	AGS_DATA_RECORD new_rec;
 
 	// Loop through each output label...
-	for (size_t i = 0; i < output_label_names.size(); i++)
+	for (const Label_Data& label : config->output_labels)
 	{
-		// Add label name...
-		char label[MAX_LABELNAME_SIZE];
-		ZeroMemory(label, MAX_LABELNAME_SIZE);
-		memcpy_s((void*)label, MAX_LABELNAME_SIZE, &output_label_names[i], MAX_LABELNAME_SIZE);
-
-		// Add label type..
-		// NOTE: this is proving harder to be generic... Need a way to get data information without simply copying out the whole database...
-		// Perhaps CDB needs to be more flexible, rather than just allowing read/write??
+		cdb->read_output(label.label_name, new_rec);	// Get data for label from CDB using label name...
+		out_payload.records.push_back(new_rec);
 	}
+
+	// Serialise out_payload...
+	std::vector<uint8_t> buffer;
+
+	// Calculate the total size of the out_payload in advance..
+	size_t total_bytes = sizeof(out_payload.header) + sizeof(out_payload.message_type) + sizeof(out_payload.num_records);
+	total_bytes += out_payload.records.size() * (MAX_LABELNAME_SIZE + sizeof(char) + sizeof(AGS_LABEL_VALUE));
+
+	// Reserve memory for buffer...
+	buffer.clear();
+	buffer.reserve(total_bytes);
+
+	// Serialise out_payload into buffer...
+	serialise(buffer, out_payload.header);
+	serialise(buffer, out_payload.message_type);
+	serialise(buffer, out_payload.num_records);
+
+	for (const AGS_DATA_RECORD& record : out_payload.records)
+	{
+		serialise(buffer, record.label_name);
+		serialise(buffer, record.data_type);
+		serialise(buffer, record.data);
+	}
+
+	// Send data over network...
+	send_msg(buffer.data(), buffer.size());
 }
 
 const bool AGS_Server::is_server_running()
@@ -217,6 +288,21 @@ void AGS_Server::send_client_connected()
 	}
 }
 
+// Function to set a ptr to the config currently informing the server. Returns true if the config is valid...
+bool AGS_Server::get_server_config(AGS_Server::Config_Rec** ptr)
+{
+	bool retval = false;
+
+	if (config != nullptr)
+	{
+		retval = true;
+		*ptr = config;
+	}
+
+	return retval;
+}
+
+/*
 bool AGS_Server::deserialise_header(const char* input, AGS_Header& output)
 {
 	bool retval = false;
@@ -246,3 +332,4 @@ bool AGS_Server::deserialise_header(const char* input, AGS_Header& output)
 
 	return retval;
 }
+*/
