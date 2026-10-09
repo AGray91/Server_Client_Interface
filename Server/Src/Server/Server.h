@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <vector>
+#include "AGS_Server/AGS_Config.h"
 
 #define SEND_RATE	1000
 
@@ -12,10 +13,22 @@ namespace AGS_Server
 	const bool is_server_running();
 	void add_client_connected_signal(std::function<void()> _delegate);
 
+	// Function to set a ptr to the config currently informing the server. Returns true if the config is valid...
+	bool get_server_config(Config_Rec** ptr);
+
 	template<typename T>
-	void append_to_buff(std::vector<char>& buffer, const T& value)
+	void serialise(std::vector<uint8_t>& buffer, const T& value)
 	{
-		const char* ptr = reinterpret_cast<const char*>(&value);
+		const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&value);
 		buffer.insert(buffer.end(), ptr, ptr + sizeof(T));
+	}
+
+	template<typename T>
+	T deserialise(const uint8_t& ptr)
+	{
+		T value;
+		std::memcpy(&value, ptr, sizeof(T));
+		ptr += sizeof(T);
+		return value;
 	}
 }
