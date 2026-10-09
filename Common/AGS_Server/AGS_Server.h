@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 #define MAX_LABELNAME_SIZE	32
 
@@ -38,7 +39,7 @@ union AGS_LABEL_VALUE
 struct AGS_DATA_RECORD
 {
 	char label_name[MAX_LABELNAME_SIZE];
-	char data_type;
+	uint8_t data_type;
 	AGS_LABEL_VALUE data;
 };
 
@@ -51,10 +52,10 @@ struct AGS_DATA_ARR_RECORD
 // Packet used to send/receive by both client and server...
 struct AGS_DATA_PACKET
 {
-	int header;
-	char message_type;
-	int num_records;
-	AGS_DATA_RECORD records[1];
+	uint32_t header = 0;
+	uint8_t message_type = 0;
+	uint32_t num_records = 0;
+	std::vector<AGS_DATA_RECORD> records;
 };
 
 // Register types used by client. Used to let the server know what labels a client is interested in...
@@ -70,5 +71,5 @@ struct AGS_REGISTER_PACKET
 	char message_type;
 	int num_records;
 	int update_rate;
-	AGS_REGISTER_RECORD records[1];
+	std::vector<AGS_REGISTER_RECORD> records;
 };
