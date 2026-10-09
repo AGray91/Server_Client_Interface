@@ -18,7 +18,7 @@ namespace AGS_Server
 	const std::string OUTPUT_START_MARKER("#CDB_OUTPUT_START");
 	const std::string OUTPUT_STOP_MARKER("#CDB_OUTPUT_STOP");
 
-	std::string file_name = "CDB_BF.cfg";
+	std::string file_name = "CDB.cfg";
 	int port_number = 49301;
 	float dead_band = 0.0f;
 
@@ -44,8 +44,8 @@ bool AGS_Server::read_config_file(AGS_Server::Config_Rec& output)
 {
 	bool retval = false;
 
-	std::ifstream config_file = std::ifstream(file_name, std::ios::binary);
-	if (config_file)
+	std::ifstream config_file(file_name, std::ios::binary);
+	if (config_file.is_open())
 	{
 		retval = true;
 
@@ -375,14 +375,15 @@ unsigned int AGS_Server::get_single_datatype(const std::string& data_type)
 
 bool AGS_Server::find_section(const std::string& section_marker, std::ifstream& config_file)
 {
-	bool found = true;
+	//bool found = true;
+	bool found = false;
 	std::string line;
 
 	// Clear any failures and reset to start of file...
 	config_file.clear();
 	config_file.seekg(0);
 
-	while (!found && getline(config_file, line));
+	while (!found && getline(config_file, line))
 	{
 		if (line.compare(START_OF_LINE, section_marker.length(), section_marker) == 0)
 		{
