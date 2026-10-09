@@ -6,21 +6,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project ("AGServer" LANGUAGES CXX)
 
 # Get Source Files...
-set(MAIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Src")
+set(MAIN_SRC 	"${CMAKE_CURRENT_SOURCE_DIR}/Src")
 set(SERVER_SRC 	"${CMAKE_CURRENT_SOURCE_DIR}/Src/Server")
-set(UI_SRC 	"${CMAKE_CURRENT_SOURCE_DIR}/Src/UI")
+set(UI_SRC 		"${CMAKE_CURRENT_SOURCE_DIR}/Src/UI")
+set(APP_SRC		"${CMAKE_CURRENT_SOURCE_DIR}/Src/App")
 
 # Seperate Source and Headers...
 file(GLOB_RECURSE SERVER_HEADERS 	"${SERVER_SRC}/*.h")
 file(GLOB_RECURSE SERVER_SOURCE 	"${SERVER_SRC}/*.cpp")
 file(GLOB_RECURSE UI_HEADERS 		"${UI_SRC}/*.h")
 file(GLOB_RECURSE UI_SOURCE 		"${UI_SRC}/*.cpp")
+file(GLOB_RECURSE APP_HEADERS		"${APP_SRC}/*.h")
+file(GLOB_RECURSE APP_SOURCE		"${APP_SRC}/*.cpp")
 
 # Define Filters
 source_group("Header Files\\Server" 	FILES ${SERVER_HEADERS})
-source_group("Header Files\\UI" 	FILES ${UI_HEADERS})
+source_group("Header Files\\UI" 		FILES ${UI_HEADERS})
+source_group("Header Files\\App"		FILES ${APP_HEADERS})
 source_group("Source Files\\Server" 	FILES ${SERVER_SOURCE})
-source_group("Source Files\\UI" 	FILES ${UI_SOURCE})
+source_group("Source Files\\UI" 		FILES ${UI_SOURCE})
+source_group("Source Files\\App"		FILES ${APP_SOURCE})
 
 # Define the Executable...
 add_executable(AGServer
@@ -29,6 +34,8 @@ add_executable(AGServer
 	${SERVER_SOURCE}
 	${UI_HEADERS}
 	${UI_SOURCE}
+	${APP_HEADERS}
+	${APP_SOURCE}
 )
 
 # Set Executable type to Win32
